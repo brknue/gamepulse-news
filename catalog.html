@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GamePulse — Full Game Catalog</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:Inter,system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 font-bold">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-violet-600 flex items-center justify-center text-sm">GP</div>
+        Game<span class="text-sky-400">Pulse</span>
+      </a>
+      <div class="flex items-center gap-4 text-sm">
+        <a href="index.html" class="hover:text-sky-400">Home</a>
+        <a href="index.html#roblox" class="text-rose-400">Roblox Hub</a>
+        <a href="catalog.html" class="text-sky-400 font-medium">Catalog</a>
+      </div>
+    </div>
+  </nav>
+  <main class="pt-20 pb-16 max-w-7xl mx-auto px-4">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold mb-2">Full Game Catalog</h1>
+      <p class="text-slate-400 text-sm max-w-2xl">Searchable database of popular games across every major platform + the largest Roblox experiences. Literally every game on the internet cannot fit on one page — this prioritizes the most played and relevant titles. Open any game in a new tab.</p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3 mb-6">
+      <input id="search" type="text" placeholder="Search any game (GTA, Blox Fruits, Steal An Egg...)" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" oninput="filterCatalog()">
+      <select id="platformFilter" onchange="filterCatalog()" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm">
+        <option value="all">All Platforms</option>
+        <option value="roblox">Roblox</option>
+        <option value="aaa">AAA / Console / PC</option>
+        <option value="indie">Indie / AA</option>
+        <option value="mobile">Mobile</option>
+        <option value="esports">Esports</option>
+      </select>
+    </div>
+    <div class="text-sm text-slate-500 mb-4"><span id="count">0</span> games shown</div>
+    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
+  </main>
+  <script>
+    const CATALOG = [
+      { slug: "steal-an-egg", title: "Steal An Egg", icon: "🥚", platform: "roblox", genre: "Simulation", players: "500k+" },
+      { slug: "murder-mystery-2", title: "Murder Mystery 2", icon: "🔪", platform: "roblox", genre: "Survival", players: "460k+" },
+      { slug: "brookhaven", title: "Brookhaven RP", icon: "🏡", platform: "roblox", genre: "Roleplay", players: "325k+" },
+      { slug: "blox-fruits", title: "Blox Fruits", icon: "🍎", platform: "roblox", genre: "RPG", players: "200k+" },
+      { slug: "adopt-me", title: "Adopt Me!", icon: "🐣", platform: "roblox", genre: "Pet Sim", players: "140k+" },
+      { slug: "throw-food-for-animals", title: "Throw Food For Animals", icon: "🥩", platform: "roblox", genre: "Simulation", players: "140k+" },
+      { slug: "steal-a-brainrot", title: "Steal a Brainrot", icon: "🧠", platform: "roblox", genre: "Simulation", players: "130k+" },
+      { slug: "rivals", title: "RIVALS", icon: "🔫", platform: "roblox", genre: "FPS", players: "97k+" },
+      { slug: "99-nights", title: "99 Nights in the Forest", icon: "🔦", platform: "roblox", genre: "Survival", players: "84k+" },
+      { slug: "jujutsu-shenanigans", title: "Jujutsu Shenanigans", icon: "🌀", platform: "roblox", genre: "Action", players: "82k+" },
+      { slug: "forsaken", title: "Forsaken", icon: "👻", platform: "roblox", genre: "Survival", players: "80k+" },
+      { slug: "dandys-world", title: "Dandy's World", icon: "🌙", platform: "roblox", genre: "Survival", players: "78k+" },
+      { slug: "anime-adventures", title: "Anime Adventures", icon: "⚔️", platform: "roblox", genre: "Strategy", players: "75k+" },
+      { slug: "gta-6", title: "Grand Theft Auto VI", icon: "🚗", platform: "aaa", genre: "Open World", players: "Pre-order #1" },
+      { slug: "wow-forever", title: "World of Warcraft Forever", icon: "🐉", platform: "aaa", genre: "MMORPG", players: "Record launch" },
+      { slug: "path-of-exile-2", title: "Path of Exile 2", icon: "⚔️", platform: "aaa", genre: "ARPG", players: "Upcoming 1.0" },
+      { slug: "valorant", title: "VALORANT", icon: "🎯", platform: "esports", genre: "Tactical FPS", players: "Esports" },
+      { slug: "league-of-legends", title: "League of Legends", icon: "⚔️", platform: "esports", genre: "MOBA", players: "Worlds" },
+      { slug: "fortnite", title: "Fortnite", icon: "🏗️", platform: "aaa", genre: "Battle Royale", players: "High" },
+      { slug: "minecraft", title: "Minecraft", icon: "🧱", platform: "aaa", genre: "Sandbox", players: "Eternal" },
+      { slug: "genshin", title: "Genshin Impact", icon: "🌪️", platform: "mobile", genre: "Action RPG", players: "High" },
+      { slug: "arc-raiders", title: "Arc Raiders", icon: "🤖", platform: "indie", genre: "Extraction", players: "17M sold" },
+      { slug: "phantom-blade-zero", title: "Phantom Blade Zero", icon: "🗡️", platform: "indie", genre: "Action", players: "4M in 3 days" }
+    ];
+    function filterCatalog() {
+      const q = document.getElementById('search').value.toLowerCase().trim();
+      const plat = document.getElementById('platformFilter').value;
+      let shown = 0;
+      document.getElementById('grid').innerHTML = CATALOG.filter(g => {
+        const matchQ = !q || g.title.toLowerCase().includes(q) || g.genre.toLowerCase().includes(q) || g.slug.includes(q);
+        const matchP = plat === 'all' || g.platform === plat;
+        return matchQ && matchP;
+      }).map(g => {
+        shown++;
+        const platColor = g.platform === 'roblox' ? 'text-rose-400 bg-rose-500/10' : g.platform === 'aaa' ? 'text-sky-400 bg-sky-500/10' : g.platform === 'indie' ? 'text-emerald-400 bg-emerald-500/10' : g.platform === 'mobile' ? 'text-pink-400 bg-pink-500/10' : 'text-violet-400 bg-violet-500/10';
+        return '<a href="track.html?game='+g.slug+'" target="_blank" class="bg-slate-900 border border-slate-800 rounded-xl p-4 hover:border-sky-500/50 transition flex items-start gap-3"><div class="text-2xl shrink-0">'+g.icon+'</div><div class="min-w-0"><div class="font-semibold text-sm truncate">'+g.title+'</div><div class="text-xs text-slate-500 mt-0.5">'+g.genre+'</div><div class="flex items-center gap-2 mt-1.5"><span class="text-[10px] px-1.5 py-0.5 rounded '+platColor+'">'+g.platform.toUpperCase()+'</span><span class="text-[10px] text-slate-500">'+g.players+'</span></div></div></a>';
+      }).join('');
+      document.getElementById('count').textContent = shown;
+    }
+    filterCatalog();
+  </script>
+</body>
+</html>
