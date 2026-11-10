@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GamePulse — Track Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>body{font-family:Inter,system-ui,sans-serif}.glass{background:rgba(15,23,42,.75);backdrop-filter:blur(12px)}</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2 font-bold">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-violet-600 flex items-center justify-center text-sm">GP</div>
+        Game<span class="text-sky-400">Pulse</span>
+      </a>
+      <div class="flex items-center gap-3 text-sm">
+        <a href="index.html" class="hover:text-sky-400">Home</a>
+        <a href="catalog.html" class="hover:text-sky-400">Full Catalog</a>
+        <a href="index.html#roblox" class="text-rose-400">Roblox Hub</a>
+        <button onclick="addToTracked()" id="trackBtn" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-white text-xs font-semibold">+ Track This</button>
+      </div>
+    </div>
+  </nav>
+  <main class="pt-20 pb-16 max-w-5xl mx-auto px-4">
+    <div id="loading" class="text-center py-20 text-slate-400">Loading game data…</div>
+    <div id="content" class="hidden">
+      <div class="flex flex-col sm:flex-row gap-6 items-start mb-8">
+        <div id="gameIcon" class="w-24 h-24 rounded-2xl bg-slate-800 flex items-center justify-center text-4xl shrink-0"></div>
+        <div class="flex-1">
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span id="platformBadge" class="px-2.5 py-0.5 rounded-full text-xs font-medium"></span>
+            <span id="genreBadge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-xs text-slate-400"></span>
+          </div>
+          <h1 id="gameTitle" class="text-3xl font-bold mb-1"></h1>
+          <p id="gameSubtitle" class="text-slate-400 text-sm mb-3"></p>
+          <div class="flex flex-wrap gap-4 text-sm">
+            <div><span class="text-slate-500">Playing now:</span> <span id="players" class="font-semibold text-emerald-400"></span></div>
+            <div><span class="text-slate-500">Rating:</span> <span id="rating" class="font-semibold"></span></div>
+            <div><span class="text-slate-500">Last update:</span> <span id="lastUpdate" class="font-semibold"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Tracking</h2>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+          <div class="bg-slate-950 rounded-xl p-3"><div class="text-xl font-bold text-sky-400" id="statPlayers">—</div><div class="text-xs text-slate-500">Concurrent</div></div>
+          <div class="bg-slate-950 rounded-xl p-3"><div class="text-xl font-bold text-violet-400" id="statVisits">—</div><div class="text-xs text-slate-500">Total Visits</div></div>
+          <div class="bg-slate-950 rounded-xl p-3"><div class="text-xl font-bold text-amber-400" id="statFav">—</div><div class="text-xs text-slate-500">Favorites</div></div>
+          <div class="bg-slate-950 rounded-xl p-3"><div class="text-xl font-bold text-rose-400" id="statTrend">—</div><div class="text-xs text-slate-500">24h Trend</div></div>
+        </div>
+      </div>
+      <div class="mb-6"><h2 class="text-xl font-bold mb-4">Latest News & Updates</h2><div id="newsList" class="space-y-3"></div></div>
+      <div class="mb-6"><h2 class="text-xl font-bold mb-4">Upcoming / Active Events</h2><div id="eventsList" class="space-y-3"></div></div>
+      <div><h2 class="text-xl font-bold mb-4">Related Games</h2><div id="related" class="flex flex-wrap gap-2"></div></div>
+    </div>
+    <div id="notFound" class="hidden text-center py-20">
+      <h1 class="text-2xl font-bold mb-2">Game not found</h1>
+      <p class="text-slate-400 mb-4">Try the full catalog.</p>
+      <a href="catalog.html" class="text-sky-400 hover:underline">Browse Catalog →</a>
+    </div>
+  </main>
+  <div id="trackedBar" class="fixed bottom-0 left-0 right-0 glass border-t border-slate-800 p-3 hidden">
+    <div class="max-w-7xl mx-auto flex items-center gap-3 overflow-x-auto">
+      <span class="text-xs text-slate-400 shrink-0">Your tracked:</span>
+      <div id="trackedList" class="flex gap-2"></div>
+      <button onclick="clearTracked()" class="ml-auto text-xs text-slate-500 hover:text-rose-400 shrink-0">Clear</button>
+    </div>
+  </div>
+  <script>
+    const GAMES = {
+      "steal-an-egg": { title: "Steal An Egg", icon: "🥚", platform: "roblox", genre: "Simulation", players: "500k+", rating: "91%", lastUpdate: "Today", visits: "11B+", fav: "9.7M", trend: "+18%", news: ["Alien Biome announced", "Mini Admin Abuse Nov 11 4AM", "Daily balancing"], events: [{name: "NEW ALIEN BIOME", when: "Coming soon", status: "upcoming"}, {name: "Mini Admin Abuse", when: "Nov 11, 4:00–4:30 AM", status: "soon"}], related: ["break-and-steal-an-egg", "steal-a-brainrot"] },
+      "murder-mystery-2": { title: "Murder Mystery 2", icon: "🔪", platform: "roblox", genre: "Survival", players: "460k+", rating: "91%", lastUpdate: "4 days ago", visits: "32.2B", fav: "24.8M", trend: "+5%", news: ["Seasonal content continuing", "New knife skins"], events: [{name: "Halloween Seasonal", when: "Ongoing", status: "live"}], related: ["forsaken"] },
+      "brookhaven": { title: "Brookhaven RP", icon: "🏡", platform: "roblox", genre: "Roleplay", players: "325k+", rating: "86%", lastUpdate: "Yesterday", visits: "89.4B", fav: "30.9M", trend: "-2%", news: ["New downtown district", "Vehicle overhaul"], events: [{name: "Map Expansion", when: "Live", status: "live"}], related: ["adopt-me"] },
+      "blox-fruits": { title: "Blox Fruits", icon: "🍎", platform: "roblox", genre: "Action RPG", players: "200k+", rating: "92%", lastUpdate: "8 days ago", visits: "65.4B", fav: "20.2M", trend: "+12%", news: ["Halloween extended", "Fruit reworks live"], events: [{name: "Halloween Extension", when: "Ongoing", status: "live"}], related: ["jujutsu-shenanigans"] },
+      "adopt-me": { title: "Adopt Me!", icon: "🐣", platform: "roblox", genre: "Pet / Roleplay", players: "140k+", rating: "86%", lastUpdate: "Yesterday", visits: "45.4B", fav: "29.9M", trend: "-8%", news: ["Fall pets rotation", "Autumn eggs until Nov 17"], events: [{name: "Fall Pets", when: "Until Nov 17", status: "live"}], related: ["brookhaven"] },
+      "throw-food-for-animals": { title: "Throw Food For Animals", icon: "🥩", platform: "roblox", genre: "Simulation", players: "140k+", rating: "94%", lastUpdate: "Today", visits: "153M+", fav: "156k", trend: "+2000%", news: ["Explosive growth", "Daily updates"], events: [], related: ["steal-an-egg"] },
+      "rivals": { title: "RIVALS", icon: "🔫", platform: "roblox", genre: "FPS", players: "97k+", rating: "94%", lastUpdate: "Yesterday", visits: "19.2B", fav: "97M+", trend: "-3%", news: ["Ranked reset", "New map testing"], events: [{name: "Ranked Reset", when: "Live", status: "live"}], related: [] },
+      "forsaken": { title: "Forsaken", icon: "👻", platform: "roblox", genre: "Survival", players: "80k+", rating: "84%", lastUpdate: "Yesterday", visits: "5.9B", fav: "3.3M", trend: "+110%", news: ["Huge trend spike"], events: [{name: "Halloween UPD", when: "Live", status: "live"}], related: ["99-nights"] },
+      "gta-6": { title: "Grand Theft Auto VI", icon: "🚗", platform: "aaa", genre: "Open World", players: "Pre-order record", rating: "TBD", lastUpdate: "Today", visits: "—", fav: "—", trend: "Historic", news: ["Most pre-ordered ever", "Pre-loads live", "Launch Nov 19"], events: [{name: "Launch", when: "November 19, 2026", status: "upcoming"}], related: [] }
+    };
+    function getSlug() { return new URLSearchParams(location.search).get('game') || ''; }
+    function renderGame(slug) {
+      const game = GAMES[slug];
+      if (!game) { document.getElementById('loading').classList.add('hidden'); document.getElementById('notFound').classList.remove('hidden'); return; }
+      document.getElementById('loading').classList.add('hidden');
+      document.getElementById('content').classList.remove('hidden');
+      document.title = game.title + ' — GamePulse';
+      document.getElementById('gameIcon').textContent = game.icon;
+      document.getElementById('gameTitle').textContent = game.title;
+      document.getElementById('gameSubtitle').textContent = game.genre + (game.platform === 'roblox' ? ' • Roblox' : '');
+      document.getElementById('players').textContent = game.players;
+      document.getElementById('rating').textContent = game.rating;
+      document.getElementById('lastUpdate').textContent = game.lastUpdate;
+      document.getElementById('statPlayers').textContent = game.players;
+      document.getElementById('statVisits').textContent = game.visits;
+      document.getElementById('statFav').textContent = game.fav;
+      document.getElementById('statTrend').textContent = game.trend;
+      const pb = document.getElementById('platformBadge');
+      pb.textContent = game.platform.toUpperCase();
+      pb.className = 'px-2.5 py-0.5 rounded-full text-xs font-medium ' + (game.platform === 'roblox' ? 'bg-rose-500/20 text-rose-400' : 'bg-sky-500/20 text-sky-400');
+      document.getElementById('genreBadge').textContent = game.genre;
+      document.getElementById('newsList').innerHTML = (game.news||[]).map(n => '<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-sm">'+n+'</div>').join('') || '<p class="text-slate-500 text-sm">No news</p>';
+      document.getElementById('eventsList').innerHTML = (game.events||[]).map(e => '<div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex justify-between"><div><div class="font-medium">'+e.name+'</div><div class="text-xs text-slate-500">'+e.when+'</div></div><span class="text-xs px-2 py-0.5 rounded-full '+(e.status==='live'?'bg-emerald-500/20 text-emerald-400':'bg-amber-500/20 text-amber-400')+'">'+e.status.toUpperCase()+'</span></div>').join('') || '<p class="text-slate-500 text-sm">No events</p>';
+      document.getElementById('related').innerHTML = (game.related||[]).map(r => { const g=GAMES[r]; return g ? '<a href="track.html?game='+r+'" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 text-sm">'+g.icon+' '+g.title+'</a>' : ''; }).join('') || '<span class="text-slate-500 text-sm">None</span>';
+    }
+    function getTracked(){ try{return JSON.parse(localStorage.getItem('gp_tracked')||'[]')}catch{return[]} }
+    function saveTracked(l){ localStorage.setItem('gp_tracked',JSON.stringify(l)); renderTrackedBar(); }
+    function addToTracked(){ const s=getSlug(); if(!s||!GAMES[s])return; let l=getTracked(); if(!l.includes(s)){l.push(s);saveTracked(l)} document.getElementById('trackBtn').textContent='✓ Tracked'; }
+    function clearTracked(){ saveTracked([]); }
+    function renderTrackedBar(){ const l=getTracked(); const bar=document.getElementById('trackedBar'); if(!l.length){bar.classList.add('hidden');return} bar.classList.remove('hidden'); document.getElementById('trackedList').innerHTML=l.map(s=>{const g=GAMES[s];return g?'<a href="track.html?game='+s+'" target="_blank" class="px-2.5 py-1 rounded-lg bg-slate-800 text-xs">'+g.icon+' '+g.title+'</a>':''}).join(''); }
+    renderGame(getSlug()); renderTrackedBar();
+    if(getTracked().includes(getSlug())) document.getElementById('trackBtn').textContent='✓ Tracked';
+  </script>
+</body>
+</html>
